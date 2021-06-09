@@ -1,10 +1,18 @@
 import {StackScreenProps} from '@react-navigation/stack';
 import React from 'react';
-import {Dimensions, Image, StyleSheet, Text, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Movie} from '../interfaces/movieInterface';
 import {RootStackParams} from '../navigation/Navigation';
-import Icon from 'react-native-vector-icons/Ionicons';
+import {useMovieDetails} from '../hooks/useMovieDetails';
+import MovieDetails from '../components/MovieDetails';
 
 const screenHeight = Dimensions.get('screen').height;
 
@@ -13,7 +21,7 @@ interface Props extends StackScreenProps<RootStackParams, 'DetailScreen'> {}
 const DetailScreen = ({route}: Props) => {
   const movie = route.params as Movie;
   const uri = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-  console.log(movie);
+  const {isLoading, cast, movieFull} = useMovieDetails(movie.id);
 
   return (
     <ScrollView>
@@ -26,9 +34,11 @@ const DetailScreen = ({route}: Props) => {
         <Text style={styles.subtitle}>{movie.original_title}</Text>
         <Text style={styles.title}>{movie.title}</Text>
       </View>
-      <View style={styles.marginContainer}>
-        <Icon name="star-outline" color="grey" size={20} />
-      </View>
+      {isLoading ? (
+        <ActivityIndicator size={35} color="grey" />
+      ) : (
+        <MovieDetails movieFull={movieFull!} cast={cast} />
+      )}
     </ScrollView>
   );
 };
@@ -54,10 +64,21 @@ const styles = StyleSheet.create({
     borderBottomEndRadius: 25,
     overflow: 'hidden',
   },
-  posterImage: {flex: 1},
-  marginContainer: {marginHorizontal: 20, marginTop: 20},
-  subtitle: {fontSize: 16, opacity: 0.8},
-  title: {fontSize: 20, fontWeight: 'bold'},
+  posterImage: {
+    flex: 1,
+  },
+  marginContainer: {
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  subtitle: {
+    fontSize: 16,
+    opacity: 0.8,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
 });
 
 export default DetailScreen;
